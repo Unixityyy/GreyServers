@@ -1,33 +1,56 @@
-﻿using BepInEx;
-using GorillaNetworking;
-using GreyServers.HarmonyPatches;
-using Photon.Pun;
-using PlayFab;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+using PlayFab;
+using GorillaNetworking;
+using GreyServers;
+
+#if BEPINEX_RELEASE
+using BepInEx;
+#elif MELONLOADER_RELEASE
+using MelonLoader;
+[assembly: MelonInfo(typeof(GreyServers.Plugin), PluginInfo.Name, PluginInfo.Version, "Unixity")]
+[assembly: MelonGame("Another Axiom", "Gorilla Tag")]
+#endif
 
 namespace GreyServers
 {
+#if BEPINEX_RELEASE
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
-        public void Awake()
+        private void Awake()
         {
-            Debug.Log("current title id is " + PlayFabSettings.TitleId);
-            PlayFabSettings.TitleId = "1457F3";
-            PlayFabAuthenticatorSettings.TitleId = "1457F3";
-            HarmonyPatches.HarmonyPatches.ApplyHarmonyPatches();
-            Debug.Log("setting titleid to " + PlayFabSettings.TitleId);
+            Initialize();
         }
+#elif MELONLOADER_RELEASE
+    public class Plugin : MelonMod
+    {
+        public override void OnInitializeMelon()
+        {
+            Initialize();
+        }
+#endif
 
+    private void Initialize()
+    {
+        Debug.Log("current title id is " + PlayFabSettings.TitleId);
+        PlayFabSettings.TitleId = "1457F3";
+        PlayFabAuthenticatorSettings.TitleId = "1457F3";
+
+        GreyServers.HarmonyPatches.HarmonyPatches.ApplyHarmonyPatches();
+
+        Debug.Log("setting titleid to " + PlayFabSettings.TitleId);
+    }
+
+#if BEPINEX_RELEASE
         private void Start()
+#elif MELONLOADER_RELEASE
+        public override void OnSceneWasLoaded(int buildIndex, string sceneName)
+#endif
         {
             Debug.Log(PlayFabAuthenticatorSettings.AuthApiBaseUrl);
-            UnityEngine.Object.DontDestroyOnLoad(this);
-            GameObject target = new GameObject();
-        }
+            UnityEngine.Object.DontDestroyOnLoad(this.gameObject);
+    GameObject target = new GameObject();
+}
     }
 }

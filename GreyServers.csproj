@@ -2,6 +2,7 @@
 
   <PropertyGroup>
 	  <TargetFramework>netstandard2.1</TargetFramework>
+	  <Configurations>Debug;Release;BepInEx_Release;MelonLoader_Release</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +29,9 @@
     </Reference>
     <Reference Include="com.rlabrecque.steamworks.net">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Gorilla Tag\Gorilla Tag_Data\Managed\com.rlabrecque.steamworks.net.dll</HintPath>
+    </Reference>
+    <Reference Include="MelonLoader">
+      <HintPath>..\..\..\Downloads\MelonLoader.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Security">
       <HintPath>$(GameAssemblyPath)\Mono.Security.dll</HintPath>
