@@ -7,33 +7,28 @@ namespace GreyServers.HarmonyPatches
     public class HarmonyPatches
     {
         public static bool IsPatched { get; private set; }
+        private static HarmonyLib.Harmony instance;
 
         internal static void ApplyHarmonyPatches()
         {
-            bool flag = !HarmonyPatches.IsPatched;
-            if (flag)
+            if (!IsPatched)
             {
-                bool flag2 = HarmonyPatches.instance == null;
-                if (flag2)
+                if (instance == null)
                 {
-                    HarmonyPatches.instance = new Harmony("com.unixity.gorillatag.greyservers");
+                    instance = new HarmonyLib.Harmony(PluginInfo.GUID);
                 }
-                HarmonyPatches.instance.PatchAll(Assembly.GetExecutingAssembly());
-                HarmonyPatches.IsPatched = true;
+                instance.PatchAll(Assembly.GetExecutingAssembly());
+                IsPatched = true;
             }
         }
 
         internal static void RemoveHarmonyPatches()
         {
-            bool flag = HarmonyPatches.instance != null && HarmonyPatches.IsPatched;
-            if (flag)
+            if (instance != null && IsPatched)
             {
-                HarmonyPatches.instance.UnpatchSelf();
-                HarmonyPatches.IsPatched = false;
+                instance.UnpatchSelf();
+                IsPatched = false;
             }
         }
-
-        private static Harmony instance;
-        public const string InstanceId = "com.unixity.gorillatag.greyservers";
     }
 }

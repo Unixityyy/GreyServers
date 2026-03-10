@@ -1,28 +1,39 @@
 ﻿using System;
 using GorillaNetworking;
 using HarmonyLib;
-using PlayFab.CloudScriptModels;
 using Photon.Pun;
 
 namespace GreyServers.HarmonyPatches
 {
-    [HarmonyPatch(typeof(GorillaComputer))]
-    [HarmonyPatch("ScreenStateExecution")]
-    internal class ComputerPatchBadName
+    [HarmonyPatch(typeof(GorillaComputer), "ProcessRoomState")]
+    internal class ComputerPatchRoom
     {
-        private static bool Prefix(string nameToCheck, bool forRoom, Action<ExecuteFunctionResult> resultCallback)
+        private static bool Prefix(GorillaComputer __instance, GorillaKeyboardBindings buttonPressed)
         {
-            if (forRoom)
+            if (buttonPressed == GorillaKeyboardBindings.enter && !string.IsNullOrEmpty(__instance.roomToJoin))
             {
-                PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(nameToCheck, JoinType.Solo);
+                PhotonNetworkController.Instance.AttemptToJoinSpecificRoom(__instance.roomToJoin, JoinType.Solo);
+
+                __instance.roomToJoin = "";
+                return false;
             }
-            else
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(GorillaComputer), "ProcessNameState")]
+    internal class ComputerPatchName
+    {
+        private static bool Prefix(GorillaComputer __instance, GorillaKeyboardBindings buttonPressed)
+        {
+            if (buttonPressed == GorillaKeyboardBindings.enter && !string.IsNullOrEmpty(__instance.currentName))
             {
-                NetworkSystem.Instance.SetMyNickName(nameToCheck);
-                GorillaComputer.instance.savedName = nameToCheck;
-                GorillaComputer.instance.currentName = nameToCheck;
+                NetworkSystem.Instance.SetMyNickName(__instance.currentName);
+                __instance.savedName = __instance.currentName;
+
+                return false;
             }
-            return false;
+            return true;
         }
     }
 }
