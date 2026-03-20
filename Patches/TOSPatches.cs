@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// taken from iidk (ily iidk)
+// it is still property of ii so i need to keep the comment above
 
 using HarmonyLib;
 using System.Threading.Tasks;
