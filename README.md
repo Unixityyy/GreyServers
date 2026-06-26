@@ -1,2 +1,3 @@
 # IMPORTANT!!!!
-i have decided to not maintain this anymore. the new repo is [here](https://github.com/hashed-droid/GreyServers). please download from here instead.
+we are going to continue this without unixity saldy solaristy will be continuing.
+
