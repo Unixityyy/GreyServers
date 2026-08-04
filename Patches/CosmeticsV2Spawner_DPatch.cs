@@ -1,49 +1,90 @@
 ﻿using HarmonyLib;
 using GorillaNetworking;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
-[HarmonyPatch(typeof(CosmeticsV2Spawner_Dirty), "ProcessLoadOpInfos")]
-public class CosmeticsV2Spawner_DPatch
+namespace GreyServers.Patches
 {
-    static bool Prefix(VRRig rig, string playfabId)
+    [HarmonyPatch(typeof(CosmeticsV2Spawner_Dirty), "ProcessLoadOpInfos")]
+    public static class CosmeticsV2Spawner_DPatch
     {
-        var traverse = Traverse.Create(typeof(CosmeticsV2Spawner_Dirty));
-        var dict = traverse.Field("_gVRRigDatasIndexByRig").GetValue<Dictionary<VRRig, int>>();
-        if (dict == null) return true;
-
-        if (!dict.ContainsKey(rig))
+        private static bool Prefix(VRRig rig, string playfabId)
         {
-            Debug.LogWarning($"{rig.gameObject.name} not found in dict, registering...");
-            if (rig.isOfflineVRRig) dict[rig] = 0;
-            else return false;
+            if (rig == null || string.IsNullOrEmpty(playfabId))
+                return true;
+
+            Traverse traverse = Traverse.Create(typeof(CosmeticsV2Spawner_Dirty));
+
+            var dict = traverse
+                .Field("_gVRRigDatasIndexByRig")
+                .GetValue<Dictionary<VRRig, int>>();
+
+            if (dict == null)
+                return true;
+
+            if (!dict.ContainsKey(rig))
+            {
+                Debug.LogWarning($"{rig.gameObject.name} not found in rig dictionary.");
+
+                if (rig.isOfflineVRRig)
+                {
+                    dict[rig] = 0;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+
+            int index = dict[rig];
+
+            Array loadOpArray = traverse
+                .Field("_g_loadOpInfosForRigAndCosmeticIDDicts")
+                .GetValue() as Array;
+
+            if (loadOpArray == null || index >= loadOpArray.Length)
+                return true;
+
+            object data = loadOpArray.GetValue(index);
+
+            if (data == null)
+            {
+                Debug.LogWarning($"Missing cosmetic load data for index {index}");
+
+                try
+                {
+                    traverse.Method("PrepareLoadOpInfos").GetValue();
+
+                    loadOpArray = traverse
+                        .Field("_g_loadOpInfosForRigAndCosmeticIDDicts")
+                        .GetValue() as Array;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"PrepareLoadOpInfos failed: {e}");
+                }
+            }
+
+            if (loadOpArray == null || index >= loadOpArray.Length)
+                return true;
+
+            IDictionary rigDict = loadOpArray.GetValue(index) as IDictionary;
+
+            if (rigDict == null)
+            {
+                Debug.LogError($"Cosmetic dictionary missing for rig index {index}");
+                return true;
+            }
+
+            if (!rigDict.Contains(playfabId))
+            {
+                Debug.LogWarning($"Cosmetic {playfabId} not found.");
+                return true;
+            }
+
+            return true;
         }
-
-        int index = dict[rig];
-        var allLoadOpDicts = traverse.Field("_g_loadOpInfosForRigAndCosmeticIDDicts").GetValue() as Array;
-        if (allLoadOpDicts == null || index >= allLoadOpDicts.Length || allLoadOpDicts.GetValue(index) == null)
-        {
-            Debug.LogWarning($"cosmetic data for rig index {index} is null; attempting force prepare...");
-            traverse.Method("PrepareLoadOpInfos").GetValue();
-            allLoadOpDicts = traverse.Field("_g_loadOpInfosForRigAndCosmeticIDDicts").GetValue() as Array;
-        }
-
-        if (allLoadOpDicts == null || index >= allLoadOpDicts.Length) return false;
-
-        var rigDict = allLoadOpDicts.GetValue(index) as System.Collections.IDictionary;
-        if (rigDict == null)
-        {
-            Debug.LogError($"cosmetic data for rig index {index} is STILL null; skipping");
-            return false;
-        }
-
-        if (!rigDict.Contains(playfabId))
-        {
-            Debug.LogWarning($"cosmetic id {playfabId} not found in spawner data; skipping");
-            return false;
-        }
-
-        return true;
     }
 }
