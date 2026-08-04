@@ -1,21 +1,28 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using GorillaNetworking;
 
-[HarmonyPatch(typeof(CosmeticsController.CosmeticSet), "ToPackedIDArray")]
-public class PackedIDArrayPatch
+namespace GreyServers.Patches
 {
-    private static void Prefix(CosmeticsController.CosmeticSet __instance)
+    [HarmonyPatch(typeof(CosmeticsController.CosmeticSet), "ToPackedIDArray")]
+    public static class PackedIDArrayPatch
     {
-        if (__instance.items == null) return;
-
-        var controller = CosmeticsController.instance;
-        if (controller == null) return;
-
-        for (int i = 0; i < __instance.items.Length; i++)
+        private static void Prefix(CosmeticsController.CosmeticSet __instance)
         {
-            if (string.IsNullOrEmpty(__instance.items[i].itemName))
+            if (__instance == null || __instance.items == null)
+                return;
+
+            CosmeticsController controller = CosmeticsController.instance;
+
+            if (controller == null || controller.nullItem == null)
+                return;
+
+            for (int i = 0; i < __instance.items.Length; i++)
             {
-                __instance.items[i] = controller.nullItem;
+                if (__instance.items[i] == null ||
+                    string.IsNullOrEmpty(__instance.items[i].itemName))
+                {
+                    __instance.items[i] = controller.nullItem;
+                }
             }
         }
     }
