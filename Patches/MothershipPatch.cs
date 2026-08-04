@@ -1,14 +1,28 @@
-﻿using HarmonyLib;
+using HarmonyLib;
+using GorillaNetworking;
 
 namespace GreyServers.Patches
 {
-    [HarmonyPatch(typeof(MothershipClientApiUnity), nameof(MothershipClientApiUnity.IsEnabled))]
-    public static class MothershipPatch
+    [HarmonyPatch(typeof(CosmeticsController.CosmeticSet), nameof(CosmeticsController.CosmeticSet.ToPackedIDArray))]
+    internal static class PackedIDArrayPatch
     {
-        public static bool Prefix(ref bool __result)
+        private static void Prefix(CosmeticsController.CosmeticSet __instance)
         {
-            __result = false;
-            return false;
+            if (__instance == null || __instance.items == null)
+                return;
+
+            CosmeticsController controller = CosmeticsController.instance;
+            if (controller == null || controller.nullItem == null)
+                return;
+
+            for (int i = 0; i < __instance.items.Length; i++)
+            {
+                if (__instance.items[i] == null ||
+                    string.IsNullOrEmpty(__instance.items[i].itemName))
+                {
+                    __instance.items[i] = controller.nullItem;
+                }
+            }
         }
     }
 }
