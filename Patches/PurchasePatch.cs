@@ -1,4 +1,4 @@
-﻿using GorillaNetworking;
+using GorillaNetworking;
 using HarmonyLib;
 using PlayFab;
 using PlayFab.ClientModels;
@@ -10,10 +10,10 @@ namespace GreyServers.Patches
     {
         private static bool Prefix(CosmeticsController __instance)
         {
-            var controller = __instance;
-
-            if (controller == null || controller.itemToBuy == null)
+            if (__instance == null)
                 return false;
+
+            CosmeticsController controller = __instance;
 
             if (controller.itemToBuy.isNullItem ||
                 controller.itemToBuy.itemName == controller.nullItem.itemName)
@@ -49,15 +49,6 @@ namespace GreyServers.Patches
                     }
 
                     controller.itemToBuy = controller.nullItem;
-
-                    try
-                    {
-                        controller.UpdateWardrobeModelsAndButtons();
-                    }
-                    catch
-                    {
-                        // Method may not exist in newer GT versions
-                    }
                 },
                 error =>
                 {
