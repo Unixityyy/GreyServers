@@ -1,18 +1,15 @@
-﻿using System;
+using System;
 using GorillaNetworking;
 using HarmonyLib;
-using PlayFab;
 
 namespace GreyServers.HarmonyPatches
 {
-    [HarmonyPatch(typeof(GorillaComputer))]
-    [HarmonyPatch("SwitchToLoadingState")]
+    [HarmonyPatch(typeof(GorillaComputer), "SwitchToLoadingState")]
     internal class ComputerLoadingPatch
     {
         private static bool Prefix()
         {
-            bool flag = !PlayFabClientAPI.IsClientLoggedIn();
-            return !flag;
+            return true;
         }
     }
 }
