@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using GorillaNetworking;
 
 [HarmonyPatch(typeof(CosmeticsController.CosmeticSet), "ToPackedIDArray")]
