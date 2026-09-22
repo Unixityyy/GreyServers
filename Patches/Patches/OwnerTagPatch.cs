@@ -59,8 +59,8 @@ namespace GreyServers.Patches
             TextMesh text = ownerTag.AddComponent<TextMesh>();
 
             text.text = "OWNER";
-            text.fontSize = 50;
-            text.characterSize = 0.1f;
+            text.fontSize = 300;
+            text.characterSize = 1f;
             text.anchor = TextAnchor.MiddleCenter;
             text.alignment = TextAlignment.Center;
 
